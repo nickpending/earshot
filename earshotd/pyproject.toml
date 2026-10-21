@@ -1,0 +1,56 @@
+[project]
+name = "earshotd"
+version = "0.1.0"
+description = "earshot daemon: page store, transcription pipeline, read API"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "av>=19.0.0",
+    "fastapi>=0.115",
+    "faster-whisper>=1.2.1",
+    "numpy>=2.5.3",
+    "pyannote-audio>=4",
+    "torch==2.11.*",
+    "torchaudio==2.11.*",
+    "torchcodec==0.17.*",
+    "uvicorn>=0.32",
+]
+
+[project.scripts]
+earshot = "earshotd.cli:main"
+earshotd = "earshotd.app:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pyannote-metrics>=4.1",
+    "httpx>=0.27",
+    "mypy>=2.4.0",
+    "ruff>=0.16.10",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/earshotd"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "model(*names): needs the named local model, 'diarization' or 'whisper'; skipped when it is absent, failed when its pointer is broken",
+]
+
+[tool.uv.sources]
+torch = { index = "torch-cpu" }
+torchaudio = { index = "torch-cpu" }
+torchcodec = { index = "torch-cpu" }
+
+[[tool.uv.index]]
+name = "torch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.mypy.overrides]]
+module = ["faster_whisper", "faster_whisper.*", "pyannote.*"]
+ignore_missing_imports = true

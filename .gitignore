@@ -1,0 +1,44 @@
+__pycache__/
+*.bin
+*.wav
+.venv/
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+!.env.sample
+*.key
+*.pem
+*.p12
+*.pfx
+*_api_key*
+*_secret*
+credentials.json
+secrets/
+
+# Agent workspace
+.claude/
+.mcp.json
+.corpus/
+
+# Spec Kit — ephemeral extension state only; everything else under .specify/ is committed
+.specify/extensions/.cache/
+.specify/extensions/.backup/
+.specify/extensions/*/local-config.yml
+.claude/worktrees/
+docs/work/*/review.diff
+docs/work/*/job-*.diff
+docs/work/*/.journal.lock
+docs/work/*/journal.jsonl
+docs/work/*/.journal.checksum
+docs/work/*/results/
+docs/work/*/shape/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Earshot.app (SwiftPM build products and the signed bundle)
+.build/
+dist/
+.swiftpm/

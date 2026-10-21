@@ -1,0 +1,72 @@
+[Unit]
+Description=earshotd: pendant page store, transcription pipeline, read API
+# earshotd.socket holds the listening socket (deploy/install.sh renders its address from `listen`)
+# and hands it to this unit; without it the service has no way to be reached.
+Requires=earshotd.socket
+After=earshotd.socket network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=earshot
+Group=earshot
+WorkingDirectory=/opt/earshot
+# Every setting (tokens, listen, data_dir, models, thresholds) comes from this file only.
+Environment=EARSHOTD_CONFIG=/etc/earshot/earshotd.toml
+# The models are local directories under /opt/earshot/models; never reach the Hub.
+Environment=HF_HUB_OFFLINE=1
+ExecStart=/opt/earshot/.venv/bin/earshotd
+Restart=always
+RestartSec=5
+StateDirectory=earshot
+# systemd resets the state directory to this mode on every start (default 0755); transcripts and audio are private.
+StateDirectoryMode=0750
+# Every file earshotd creates is private to it.
+UMask=0077
+# earshotd parses untrusted audio (PyAV, torch): bound its memory. 6G is sized to an 8 GiB server
+# (peak seen 6.2G including page cache). Size it to the host with `systemctl edit earshotd`: a
+# percentage is no limit inside an LXC, and install.sh rewrites this unit on every run but never
+# touches earshotd.service.d/.
+MemoryMax=6G
+
+# No network of its own: its namespace holds only loopback. It serves the socket systemd passes in.
+PrivateNetwork=yes
+# AF_INET and AF_INET6 stay so the passed socket and loopback work as measured. No AF_UNIX: through
+# /run/dbus or a varlink socket a host's local services (systemd-resolved on Ubuntu by default) would
+# be a channel out of the private network; the pipeline was measured to need none.
+RestrictAddressFamilies=AF_INET AF_INET6
+
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=yes
+PrivateUsers=yes
+PrivateIPC=yes
+RemoveIPC=yes
+ProtectSystem=strict
+ProtectHome=true
+ProtectClock=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectHostname=yes
+ProtectProc=invisible
+ReadWritePaths=/var/lib/earshot
+CapabilityBoundingSet=
+AmbientCapabilities=
+DevicePolicy=closed
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged
+# Left off on purpose, each measured to break the pipeline:
+#   MemoryDenyWriteExecute=yes   CTranslate2's oneDNN JIT needs writable-executable memory
+#                                (faster-whisper encode fails "could not create a primitive").
+#   ProcSubset=pid               torch reads /proc/cpuinfo at import and logs a cpuinfo error.
+#   SystemCallFilter=~@resources torch's thread setup is killed with SIGSYS at import.
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,51 @@
+# /etc/earshot/earshotd.toml  (owner root:earshot, mode 0640)
+# Generate each token on the server with: openssl rand -hex 32
+# A token carries exactly one scope; never list a token twice.
+
+# Loopback only. To serve a proxy on another host, set a network address (e.g. 0.0.0.0:8080)
+# AND uncomment the three TLS lines below: earshotd refuses to start on a network address
+# without them. The proxy then speaks mutual TLS: it must present proxy.crt's key, so spoofing
+# its address reaches nothing. Also set proxy_addresses to the proxy host's address: install.sh
+# then loads a firewall that admits the port only from those addresses (and loopback), and
+# refuses to install without it. install.sh renders earshotd.socket and the firewall from this
+# file; nothing in deploy/ is edited. See README.md, "Setup 2", for the certificate exchange.
+listen = "127.0.0.1:8080"
+data_dir = "/var/lib/earshot"
+
+# tls_cert = "/etc/earshot/tls/server.crt"    # install.sh generates server.crt and server.key here
+# tls_key = "/etc/earshot/tls/server.key"
+# tls_proxy_certs = ["/etc/earshot/tls/proxy.crt"]   # copied from the proxy host's proxy-cert.sh
+# proxy_addresses = ["192.0.2.10"]   # the proxy host(s) the firewall admits; IPv4 or IPv6, no ranges
+#
+# Only to serve plain http on a network address, with the firewall as the sole protection, use
+# this instead of the three lines above (the two together are refused):
+# insecure_plain_http = true
+
+# The zone days are cut in (the days list, a day's transcript, the markdown clock). Absent, it is the
+# host's own zone (/etc/localtime), and UTC on a host with none: a server whose zone is UTC cuts
+# days at UTC midnight until this is set. An IANA name; an unknown one refuses to start. Changing it
+# on a store that already holds days needs `earshot rebuild` to re-key the stored day speakers.
+# timezone = "Europe/Berlin"
+
+# Both models are directories deploy/install.sh installs root-owned under /opt/earshot/models;
+# install.sh refuses any other location (a bare model name would download at runtime).
+# whisper is fetched there at the revision pinned in earshotd/src/earshotd/models.py.
+whisper_model = "/opt/earshot/models/faster-whisper-large-v3-turbo"
+
+# The five pinned pyannote files, installed and sha256-checked by deploy/install.sh; no Hub, no token at runtime.
+diarization_model = "/opt/earshot/models/speaker-diarization-community-1"
+
+# The Limitless API key never goes in this file: earshotd refuses a config that holds one.
+# `earshot import-limitless` asks for it at a hidden prompt, or reads it from stdin.
+
+# Tuned on AMI ES2004a (C8, C9); record the tuned values here.
+speaker_link_threshold = 0.5
+voice_match_threshold = 0.5
+
+[[tokens]]
+token = "REPLACE_WITH_openssl_rand_hex_32"
+scope = "upload"
+
+[[tokens]]
+token = "REPLACE_WITH_ANOTHER_openssl_rand_hex_32"
+scope = "read"

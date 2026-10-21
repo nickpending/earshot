@@ -1,0 +1,11 @@
+[Unit]
+Description=earshotd listening socket
+
+[Socket]
+# deploy/install.sh renders this line from `listen` in /etc/earshot/earshotd.toml; the value here
+# is only the default. systemd holds the socket in the host's network namespace and passes it to
+# earshotd, which runs with no network of its own (PrivateNetwork=yes in earshotd.service).
+ListenStream=127.0.0.1:8080
+
+[Install]
+WantedBy=sockets.target
