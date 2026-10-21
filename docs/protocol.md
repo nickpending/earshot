@@ -9,8 +9,8 @@ omi's code.
 Fetch the reference tree:
 
 ```sh
-git clone https://github.com/BasedHardware/omi.git /tmp/omi
-git -C /tmp/omi checkout 056936e0ed0667ebb269b0a17fcbcc4c37275f8c
+git clone https://github.com/BasedHardware/omi.git omi
+git -C omi checkout 056936e0ed0667ebb269b0a17fcbcc4c37275f8c
 ```
 
 | File | What it is |

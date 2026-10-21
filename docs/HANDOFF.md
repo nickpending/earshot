@@ -80,9 +80,9 @@ set explicitly:
 | blue | ready to pair |
 | purple | factory reset in progress |
 | solid red | recovery mode: the reset's double-press was too slow. Hold the button 10+ s until it clears. |
-| red blink 3×, pause, repeat | clock needs syncing before recording resumes (SetCurrentTime fixes it) |
-| red blink 10× | flash full |
-| red blink 4×, 5 s pause | too hot |
+| red flashing 3×, pause, repeat | clock needs syncing before recording resumes (SetCurrentTime fixes it) |
+| red flashing 10× | flash full |
+| red flashing 4×, 5 s pause | too hot |
 | breathing red | microphone init failure |
 
 **Button.** Long press starts/stops recording (omi comment in `_tryParseButtonStatus`). SHORT,
@@ -172,7 +172,7 @@ real-data acceptance input.
     Cloudflare bot rule, not the key.
 14. **`log` is a zsh builtin.** In zsh, `log show ...` runs the builtin (it prints `too many
     arguments`, or nothing when piped) instead of macOS's unified-log tool, so the app looks
-    silent. Call `/usr/bin/log show --predicate 'subsystem == "casa.mal.Earshot"' --last 1h`.
+    silent. Call `/usr/bin/log show --predicate 'process == "Earshot"' --last 1h`.
 15. **Marker pages.** The pendant writes pages whose audio field holds only metadata (page 3935:
     `48 01`). omi's codec drops them, and before marker-pages (0f171b7) the drain refused to ACK
     past one, so from 2026-10-03 every 90 s drain re-downloaded the whole flash. The drain now
